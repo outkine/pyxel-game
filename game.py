@@ -1,27 +1,30 @@
-from pyxel import *
+import pyxel
 
-init(64, 64)
-load('assets/my_resource.pyxres')
+pyxel.init(64, 64)
+pyxel.load('assets/my_resource.pyxres')
+
 
 def add_coords(c1, c2):
     return (c1[0] + c2[0], c1[1] + c2[1])
+
 
 class Tilemap:
     def __init__(self, x):
         self.x = x
 
     def get(self, coords, tm=0):
-        return tilemap(tm).get(self.x * 8 + coords[0], coords[1])
+        return pyxel.tilemap(tm).get(self.x * 8 + coords[0], coords[1])
 
     def find_tile_all(self, tile, tm=0):
-        return [(x, y) for x in range(8) for y in range(8) if self.get((x, y), tm) == tile]
+        return [(x, y) for x in range(8) for y in range(8)
+                if self.get((x, y), tm) == tile]
 
     def find_tile(self, tile, tm=0):
         res = self.find_tile_all(tile, tm)
         return res and res[0]
 
     def draw(self):
-        bltm(0, 0, 0, self.x * 8, 0, 8, 8, 0)
+        pyxel.bltm(0, 0, 0, self.x * 8, 0, 8, 8, 0)
 
 
 class Thing:
@@ -31,7 +34,8 @@ class Thing:
         self.sprite_row = sprite_row
 
     def draw(self):
-        blt(self.coords[0] * 8, self.coords[1] * 8, 0, self.sprite * 8, self.sprite_row * 8, 8, 8, 0)
+        pyxel.blt(self.coords[0] * 8, self.coords[1] * 8, 0, self.sprite * 8,
+                  self.sprite_row * 8, 8, 8, 0)
 
 
 class TrailEnemy(Thing):
@@ -40,7 +44,11 @@ class TrailEnemy(Thing):
         self.previous_coords = None
 
     def touching_trail(self):
-        return [add_coords(self.coords, change) for change in [(0, -1), (0, 1), (-1, 0), (1, 0)] if add_coords(self.coords, change) in trail]
+        return [
+            add_coords(self.coords, change)
+            for change in [(0, -1), (0, 1), (-1, 0), (1, 0)]
+            if add_coords(self.coords, change) in trail
+        ]
 
     def update(self):
         old_coords = self.coords
@@ -50,7 +58,8 @@ class TrailEnemy(Thing):
             if not self.previous_coords:
                 self.coords = tiles[0]
             else:
-                self.coords = next(filter(lambda tile: tile != self.previous_coords, tiles))
+                self.coords = next(
+                    filter(lambda tile: tile != self.previous_coords, tiles))
         elif len(tiles) == 1:
             self.coords = tiles[0]
         else:
@@ -77,6 +86,7 @@ exit = None
 trail = None
 enemy = None
 
+
 def next_level():
     global entrance, exit, trail, enemy
 
@@ -92,6 +102,7 @@ def next_level():
     if trail:
         enemy = TrailEnemy(trail, ENEMY_S, 0)
 
+
 next_level()
 
 while True:
@@ -101,13 +112,13 @@ while True:
     old_coords = p.coords
 
     (x, y) = p.coords
-    if btnp(KEY_W):
+    if pyxel.btnp(pyxel.KEY_W):
         y -= 1
-    elif btnp(KEY_S):
+    elif pyxel.btnp(pyxel.KEY_S):
         y += 1
-    elif btnp(KEY_A):
+    elif pyxel.btnp(pyxel.KEY_A):
         x -= 1
-    elif btnp(KEY_D):
+    elif pyxel.btnp(pyxel.KEY_D):
         x += 1
     p.coords = (x, y)
 
@@ -120,12 +131,11 @@ while True:
     if enemy and not t % 5:
         enemy.update()
 
-    cls(0)
+    pyxel.cls(0)
     tm.draw()
     p.draw()
     if enemy:
         enemy.draw()
-    flip()
+    pyxel.flip()
 
     t += 1
-
